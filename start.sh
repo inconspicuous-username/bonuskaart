@@ -1,1 +1,1 @@
-docker run -p 3002:80 -d --restart unless-stopped --log-driver local bonuskaart
+docker run -p 3002:80 -d --restart unless-stopped --name bonuskaart --log-driver local bonuskaart
