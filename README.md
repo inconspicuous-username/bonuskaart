@@ -34,7 +34,7 @@ When visiting the website again, the website will check for cookies. If it finds
 
 ## FAQ:
 ### Doesn't the cookie store identifiable information?
-Yes, but this cookie never leaves your device. The checking for cookies happens on the client (i.e. your smartphone). Take a look at the code, if you want to see for yourself.
+Yes, but this cookie never leaves your device. The checking for cookies happens on the client (i.e. your smartphone). Take a look at [the code](https://github.com/inconspicuous-username/bonuskaart/blob/master/static/index.html), if you want to see for yourself.
 
 ### Wouldn't a single card for all the users add more noise?
 Yes. However, if two people with the same barcode in the same store, want to use the handheld scanners it may cause problems.
