@@ -3,14 +3,21 @@
 
 [Bonuskaart.com](https://bonuskaart.com) will make sure you always have a Bonuskaart at hand, while also preserving your privacy!
 
+At the moment this project is very much work in progress:
+* The front-end is not responsive. The sizes were just picked until it worked on my phone (Please don't look at the website on a desktop/laptop, it's horrible)
+* All the bonuskaart barcodes are stored in a text file which is read on startup
+* Uploaded barcodes are currently only stored in a log, and will have to be added manually to said text file
+
 ## Why
-I absolutely love Albert Heijn, the products are good, prices are reasonable, and the service is great! But next to that, I also love privacy. The Bonuskaart is Albert Heijn's customer loyalty card, which uppon showing, gives you a discount on selected products.
+I absolutely love Albert Heijn, the products are good, prices are reasonable, and the service is great! But next to that, I also love privacy. The Bonuskaart is Albert Heijn's customer loyalty card, which upon showing, gives you a discount on selected products.
 
 While Albert Heijn does offer an anonymous Bonuskaart, it's not really anonymous if you're the only person using it. When you scan your Bonuskaart to get your discount, Albert Heijn can link the purchase to you.
 
 Besides leaking information on when and where you shop for which products, it also leaks a tremendous amount of meta data. This meta data can include indicators on your age, gender, level of education, type of household and more. In a collaboration between Albert Heijn and Micrsoft they claim to know what you will buy before you even in the shop [1]. Don't get me wrong, I trust Albert Heijn not to abuse the information they have. However, I believe that it never hurts to reduce your digital footprint.
 
 Often privacy preserving come with a cost in the form of inconvenience. I could of course not use a Bonuskaart, but then I would end up paying more than necessary. I could also ask one of the friendly cashiers if they can scan their bonuskaart, but that's an inconvenience when using the self-scan registers. So I created [Bonuskaart.com](https://bonuskaart.com), a simple website that serves a fresh bonuskaart everyday.
+
+[1] "Albert Heijn - Predict my List" by 'Microsoft Western Europe' at [youtube.com](https://www.youtube.com/watch?v=0heyIKUqdOM)
 
 ## How does it work
 
