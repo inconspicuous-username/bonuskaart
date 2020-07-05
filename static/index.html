@@ -28,14 +28,10 @@
 	}
 
 	function getBonuskaart() {
-	  console.log("Let's check if we can find a cookie")
 	  var kaart = getCookie("bonuskaart");
-	  console.log(kaart)
 	  if (kaart == "") {
-		  console.log("We couldn't find a cookie, getting a new one")
 		getNewBonuskaart();
 	  } else{
-		console.log("Found an existing bonuskaart, plotting it now!")
 	  JsBarcode("#barcode", kaart, {format: "EAN13", 
 	    	width:6, 
 	    	height:300, 
@@ -60,10 +56,8 @@
     // }
 
     function getNewBonuskaart(){
-		console.log("Getting a new bonuskaart")
 		var xhttp = new XMLHttpRequest();
 	  	xhttp.onreadystatechange = function() {
-	  		console.log(this.responseText);
 		    if (this.readyState == 4 && this.status == 200) {
 				StoreBonuskaart(this.responseText);
 				JsBarcode("#barcode", this.responseText, {format: "EAN13", 
@@ -73,7 +67,6 @@
 				margin: 30});
 		    }
 		}
-		console.log("Sending out request now")
 		xhttp.open("GET", "/GetCard", true);
   		xhttp.send();
 	}
