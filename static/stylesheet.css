@@ -1,0 +1,30 @@
+
+	.border {
+		border: 2px solid black;
+		border-radius: 5px;
+	}
+
+	a {
+	  color: grey;
+	  line-height: 1.6;
+	  font-size: 40px;
+	  text-decoration: none;
+	}
+
+	p {
+	  line-height: 1.6;
+	  font-size: 40px;
+	}
+
+	h1 {
+		font-size: 80px;
+	}
+
+	h2 {
+		font-size: 45px;
+	}
+	.footer {
+	  background-color: #F1F1F1;
+	  text-align: center;
+	  padding: 10px;
+	}

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Bonuskaart</title>
+	<link rel="stylesheet" type="text/css" href="/stylesheet.css">
+	<style type="text/css">
+	body {
+	  font-family: Verdana, Helvetica, sans-serif;
+	}
+	</style>
+	<script src="/JsBarcode.ean-upc.min.js"></script>
+</head>
+<body>
+	<script>
+		function validateForm() {
+			var x, text;
+			x = document.getElementById("kaart").value;
+			// If x is Not a Number or not exactly 13 characters long it can't be a valid bonuskaart
+			if (isNaN(x) || (x.length != 13)) {
+			text = "A bonuskaart contains only numbers and must be 13 characters long";
+				alert(text)
+				return false
+			}			
+		}
+		</script>
+
+ <h1>Donate a bonuskaart!</h1>
+ <p><b>Before you proceed:</b> <br>Only upload your own bonuskaart. <br><br> It's advised not to upload a bonuskaart linked to your personal details, as random stranger can make purchase that can be traced back to you.</p>
+
+<form action="http://localhost/GiveCard" method="post" onsubmit="return validateForm()" target="_blank" style="text-align: center;">
+	<input type="text" id="kaart" name="kaart" style="font-size: 40pt"><br><br>
+	<input type="submit" value="Submit" style="font-size: 40pt">
+</form>
+
+
+
+<div class="footer">
+	<p>bonuskaart.com is in not affiliated with Albert Heijn.</p>
+	<p>Contribute at <a href="https://github.com/inconspicuous-username/bonuskaart">github.com.</a></p>
+  </div>
+
+</body>
+</html> 

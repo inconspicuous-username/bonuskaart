@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Bonuskaart</title>
+	<link rel="stylesheet" type="text/css" href="/stylesheet.css">
+	<style type="text/css">
+	body {
+	  text-align: center;	
+	  font-family: Verdana, Helvetica, sans-serif;
+	}
+	</style>
+	<script src="/JsBarcode.ean-upc.min.js"></script>
+    <script type="text/javascript">
+
+	function getCookie(cname) {
+	var name = cname + "=";
+	var ca = document.cookie.split(';');
+	for(var i = 0; i < ca.length; i++) {
+		var c = ca[i];
+		while (c.charAt(0) == ' ') {
+		  c = c.substring(1);
+		}
+		if (c.indexOf(name) == 0) {
+		  return c.substring(name.length, c.length);
+		}
+	}
+	return "";
+	}
+
+	function getBonuskaart() {
+	  console.log("Let's check if we can find a cookie")
+	  var kaart = getCookie("bonuskaart");
+	  console.log(kaart)
+	  if (kaart == "") {
+		  console.log("We couldn't find a cookie, getting a new one")
+		getNewBonuskaart();
+	  } else{
+		console.log("Found an existing bonuskaart, plotting it now!")
+	  JsBarcode("#barcode", kaart, {format: "EAN13", 
+	    	width:6, 
+	    	height:300, 
+	    	fontSize: 60,
+			margin: 30});
+		}
+	} 
+
+    function StoreBonuskaart(kaartNumber) {
+    	var decodedCookie = decodeURIComponent(document.cookie);
+        // alert(decodedCookie);
+        var d = new Date();
+        d.getDate();
+        d.setUTCHours(23);
+        d.setUTCMinutes(59);
+        var expires = "expires="+d.toUTCString();
+        document.cookie = "bonuskaart=" + kaartNumber + ";" + expires + ";path=/;" + "SameSite=Strict; Secure";
+    }
+
+    // function getNewBonuskaart(){
+
+    // }
+
+    function getNewBonuskaart(){
+		console.log("Getting a new bonuskaart")
+		var xhttp = new XMLHttpRequest();
+	  	xhttp.onreadystatechange = function() {
+	  		console.log(this.responseText);
+		    if (this.readyState == 4 && this.status == 200) {
+				StoreBonuskaart(this.responseText);
+				JsBarcode("#barcode", this.responseText, {format: "EAN13", 
+				width:6, 
+				height:300, 
+				fontSize: 60,
+				margin: 30});
+		    }
+		}
+		console.log("Sending out request now")
+		xhttp.open("GET", "/GetCard", true);
+  		xhttp.send();
+	}
+
+    </script>
+</head>
+<body>
+
+<h1>Here's your Bonuskaart</h1>
+<svg id="barcode" class="border" onload='getBonuskaart();'></svg><Br>
+<a href="#" onclick='getNewBonuskaart();'>Refresh my bonuskaart</a><br>
+
+<br>
+<a href="/why.html">Why?</a><br>
+<a href="/how.html">How?</a><br>
+<br>
+<a href="/donate_bonuskaart.html">Upload your bonuskaart!</a><br>
+
+<br>
+<br>
+<br>
+<div class="footer">
+	<p>bonuskaart.com is in not affiliated with Albert Heijn.</p>
+	<p>Contribute at <a href="https://github.com/inconspicuous-username/bonuskaart">github.com.</a></p>
+  </div>
+
+</body>
+</html> 

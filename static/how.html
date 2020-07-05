@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Bonuskaart</title>
+	<link rel="stylesheet" type="text/css" href="/stylesheet.css">
+	<style type="text/css">
+	body {
+	  font-family: Verdana, Helvetica, sans-serif;
+	}
+	</style>
+</head>
+<body>
+
+<h1>How?</h1>
+<p>
+	The privacy preserving functionality of <a href="/index.html">bonuskaart.com</a>  comes from a combination of two effects. </p><p>Firstly, by using a different bonuskaart for every purchase, personal information will be fragmented. If there are <i>n</i> cards in the database, each bonuskaart will only contain <i>1/n<sup>th</sup></i> of a single person's personal information.
+	</p>
+<p>
+	The second part comes from the fact that each bonuskaart can be used by an arbitrary amount of people. When trying to identify a single person, every other person using the same bonuskaart adds noise. The more people using the same card, the noisier the data becomes, the more private it becomes.</p>
+
+<h2>How does the website work</h2>
+<p>
+	When you visit <a href="/index.html">bonuskaart.com</a>  for the first time, it will send a request for a new bonuskaart. Upon reception, the server will randomly select a barcode and send it to the client. When the client receives this bonuskaart, they will store it in a cookie. This cookie will expire at 23:59 of that day.</p>
+
+<p>
+	When visiting the website again, the website will check for cookies. If it finds one, it will use bonsukaart stored in the cookie instead of requesting a new one.
+	The reuse of the same bonuskaart is required for the handheld scanners. To unlock a scanner one scans a bonuskaart, but to checkout you need to scan the same bonuskaart at a payment terminal.
+
+</p>
+
+
+<h2>FAQ:</h2>
+<p><b>Doesn't the cookie store identifiable information?</b><br>
+	Yes, but this cookie never leaves your device.
+	The checking for cookies happens on the client (i.e. your smartphone).
+	Take a look at the code, if you want to see for yourself.
+</p>
+
+
+<p><b>Wouldn't a single card for all the users add more noise?</b><br>
+	Yes. However, if two people with the same barcode in the same store, want to use the handheld scanners it may cause problems.<br>
+	I don't know what the exact behavior would be, but I suspect it would prevent you taking out two scanners with the same bonuskaart.
+	Another possibility is that, at checkout, the system would confuse you for the other customer, making you pay for someone else's groceries.
+</p>
+
+<p><b>This project is really awesome/horrible, can I contribute?</b><br>
+	Absolutely! please find the repository at github.com.
+</p>
+
+<p><b>Can I donate a Bonuskaart?</b><br>
+	Yes, please do so!.<br>
+	You can fill in the numbers below <a href="/donate_bonuskaart.html">your barcode here</a> 
+</p>
+
+
+<div class="footer">
+	<p>bonuskaart.com is in not affiliated with Albert Heijn.</p>
+	<p>Contribute at <a href="https://github.com/inconspicuous-username/bonuskaart">github.com.</a></p>
+  </div>
+
+</body>
+</html> 
