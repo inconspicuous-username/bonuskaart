@@ -30,8 +30,6 @@ func getBonusKaart(w http.ResponseWriter, r *http.Request) {
 func getNumbberOfCards(w http.ResponseWriter, r *http.Request) {
 	Response := fmt.Sprintf("%d", len(bonusCards))
 	// Tell the client not to cache the result.
-	// This function is only called when the client explicitly
-	// indicates that they want a new bonuskaart.
 	w.Header().Set("Cache-Control", "no-cache")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(Response))
@@ -74,7 +72,7 @@ func main() {
 	http.HandleFunc("/GetCard", getBonusKaart)
 	http.HandleFunc("/GiveCard", giveBonusKaart)
 	http.HandleFunc("/GetNumberOfCards", getNumbberOfCards)
-	if err := http.ListenAndServe(":8123", nil); err != nil {
+	if err := http.ListenAndServe(":80", nil); err != nil {
 		log.Fatal(err)
 	}
 }
