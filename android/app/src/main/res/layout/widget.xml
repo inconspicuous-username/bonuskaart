@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_border"
+    android:gravity="center"
+    android:padding="10dp">
+
+    <ImageView
+        android:id="@+id/BarcodeIV"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/BarcodeTV"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_toStartOf="@+id/ReloadIV"
+        android:contentDescription="barcode"
+        android:scaleType="fitXY"
+        android:src="@drawable/barcode" />
+
+    <ImageView
+        android:id="@+id/ReloadIV"
+        android:layout_width="50dp"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/BarcodeTV"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:adjustViewBounds="true"
+        android:contentDescription="new_barcode"
+        android:scaleType="centerInside"
+        android:src="@drawable/new_barcode" />
+
+    <TextView
+        android:id="@+id/BarcodeTV"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_toStartOf="@+id/ReloadIV"
+        android:gravity="center"
+        android:text="barcode"
+        android:textColor="@android:color/black"
+        android:textSize="14sp"
+        android:includeFontPadding="false"
+        android:layout_marginBottom="-3dp"/>
+</RelativeLayout>
