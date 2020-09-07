@@ -27,6 +27,16 @@ func getBonusKaart(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func getNumbberOfCards(w http.ResponseWriter, r *http.Request) {
+	Response := fmt.Sprintf("%d", len(bonusCards))
+	// Tell the client not to cache the result.
+	// This function is only called when the client explicitly
+	// indicates that they want a new bonuskaart.
+	w.Header().Set("Cache-Control", "no-cache")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(Response))
+}
+
 func giveBonusKaart(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -57,15 +67,16 @@ func serveFiles(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	log.Println("Application started")
+	defer log.Println("Application stopped")
 	rand.Seed(time.Now().UnixNano())
 	bonusCards = readFile()
 	http.HandleFunc("/", serveFiles)
 	http.HandleFunc("/GetCard", getBonusKaart)
 	http.HandleFunc("/GiveCard", giveBonusKaart)
-	if err := http.ListenAndServe(":80", nil); err != nil {
+	http.HandleFunc("/GetNumberOfCards", getNumbberOfCards)
+	if err := http.ListenAndServe(":8123", nil); err != nil {
 		log.Fatal(err)
 	}
-
 }
 
 func readFile() []string {
