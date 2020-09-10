@@ -25,7 +25,9 @@ import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -36,6 +38,7 @@ public class WidgetProvider extends AppWidgetProvider {
     private static final String GENERAL_PREF = "GENERAL_PREF";
     private static final String BARCODE = "BARCODE";
     private static final String BARCODE_TIME = "BARCODE_TIME";
+    private static final String BARCODE_CASHE = "BARCODE_CASHE";
     private static final String WIDGET_UPDATE_GET_NEW_BARCODE = "WIDGET_UPDATE_GET_NEW_BARCODE";
     private static final String WIDGET_ID = "WIDGET_ID";
 
@@ -73,38 +76,17 @@ public class WidgetProvider extends AppWidgetProvider {
                 super.onReceive(context, intent);
                 return;
             }
+
             // Check if requesting new barcode
             if(extras != null && extras.getBoolean(WIDGET_UPDATE_GET_NEW_BARCODE, false)){
-                getNewBarcode(context,
-                        new Response.Listener<String>() {
-                            @Override
-                            public void onResponse(String barcode) {
-                                // Get barcode creation time
-                                long barcodeTime = System.currentTimeMillis() / 1000;
-
-                                // Get shared preferences editor
-                                final SharedPreferences prefs = context.getSharedPreferences(GENERAL_PREF, MODE_PRIVATE);
-                                SharedPreferences.Editor editor = prefs.edit();
-
-                                // Save new cookie and generation time
-                                editor.putString(BARCODE, barcode);
-                                editor.putLong(BARCODE_TIME, barcodeTime);
-                                editor.apply();
-                                Log.d("Widget", "onReceive new barcode: " + barcode + " created at: " + barcodeTime);
-
-                                // Call onUpdate with necessary parameters
-                                AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-                                int[] lastWidgetIds = {widgetId};
-                                onUpdate(context, appWidgetManager, lastWidgetIds);
-                            }
-                        }
-                );
-            }else{
-                // Call onUpdate with necessary parameters
-                AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-                int[] lastWidgetIds = {widgetId};
-                onUpdate(context, appWidgetManager, lastWidgetIds);
+                getNewBarcode(context);
             }
+
+            // Call onUpdate with necessary parameters
+            AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+            int[] lastWidgetIds = {widgetId};
+            onUpdate(context, appWidgetManager, lastWidgetIds);
+
         }else{
             super.onReceive(context, intent);
         }
@@ -112,6 +94,7 @@ public class WidgetProvider extends AppWidgetProvider {
 
     private void update(Context context, final AppWidgetManager appWidgetManager, final int widgetId, final Bundle options){
         Log.d("Widget", "update: " + widgetId);
+
         // Get widget view
         final RemoteViews widgetView = new RemoteViews(context.getPackageName(), R.layout.widget);
 
@@ -133,33 +116,11 @@ public class WidgetProvider extends AppWidgetProvider {
         if(barcode == null || now - (24 * 60 * 60) > barcodeTime){
             Log.d("Widget", "barcode: " + barcode + " created at: " + barcodeTime + " not valid");
 
-            getNewBarcode(context,
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String barcode) {
-                            // Get barcode creation time
-                            long barcodeTime = System.currentTimeMillis() / 1000;
-
-                            // Get shared preferences editor
-                            SharedPreferences.Editor editor = prefs.edit();
-
-                            // Save new cookie and generation time
-                            editor.putString(BARCODE, barcode);
-                            editor.putLong(BARCODE_TIME, barcodeTime);
-                            editor.apply();
-                            Log.d("Widget", "update new barcode: " + barcode + " created at: " + barcodeTime);
-
-                            // Update widget view
-                            updateView(appWidgetManager, widgetId, options, widgetView, barcode);
-                        }
-                    }
-            );
-        }else{
-            Log.d("Widget", "Barcode: " + barcode + " created at: " + barcodeTime + " still valid");
-
-            // Update widget view
-            updateView(appWidgetManager, widgetId, options, widgetView, barcode);
+            // Get new barcode
+            barcode = getNewBarcode(context);
         }
+
+        updateView(appWidgetManager, widgetId, options, widgetView, barcode);
     }
 
     private void updateView(AppWidgetManager appWidgetManager, int widgetId, Bundle options, RemoteViews widgetView, String barcode){
@@ -191,18 +152,64 @@ public class WidgetProvider extends AppWidgetProvider {
         appWidgetManager.updateAppWidget(widgetId, widgetView);
     }
 
-    private void getNewBarcode(Context context, Response.Listener<String> callback){
-        Log.d("Widget", "GetNewBarcode");
+    private String getNewBarcode(Context context){
+        Log.d("Widget", "getNewBarcode");
 
-        // Instantiate the RequestQueue.
-        RequestQueue queue = Volley.newRequestQueue(context);
+        // Get shared preferences
+        SharedPreferences prefs = context.getSharedPreferences(GENERAL_PREF, MODE_PRIVATE);
 
-        // Request a string response from the provided URL.
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, NEW_BARCODE_URL, callback, null);
+        // Retrieve barcode cache
+        Set<String> barcode_cache = prefs.getStringSet(BARCODE_CASHE, null);
 
-        // Add the request to the RequestQueue.
-        queue.add(stringRequest);
+        String new_barcode;
+
+        if(barcode_cache != null && barcode_cache.size() > 0){
+            Log.d("Widget", "getNewBarcode: barcode_cache found " + barcode_cache.size());
+            if(barcode_cache.size() < 5){
+                // Cache low, download new barcodes
+                // TODO get new barcodes in new thread
+            }
+
+            // Get and remove first barcode from cache
+            Iterator<String> iterator = barcode_cache.iterator();
+            new_barcode = iterator.next();
+            iterator.remove();
+
+            Log.d("Widget", "getNewBarcode: barcode_cache found " + barcode_cache.size());
+            // Save updated cache
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putStringSet(BARCODE_CASHE, barcode_cache);
+            editor.apply();
+
+        }else{
+            Log.d("Widget", "getNewBarcode: No barcode_cache found");
+            // No cache found download new barcodes
+            //TODO get new barcodes in this thread
+            new_barcode = "000000000000";
+        }
+
+        // Save and update widget
+        saveBarcode(prefs, new_barcode);
+
+        return new_barcode;
     }
+
+    private void saveBarcode(SharedPreferences prefs, String barcode){
+        Log.d("Widget", "saveBarcode: " + barcode);
+
+        // Get barcode creation time
+        long barcodeTime = System.currentTimeMillis() / 1000;
+
+        // Get shared preferences editor
+        SharedPreferences.Editor editor = prefs.edit();
+
+        // Save new barcode and generation time
+        editor.putString(BARCODE, barcode);
+        editor.putLong(BARCODE_TIME, barcodeTime);
+        editor.apply();
+        Log.d("Widget", "saved new barcode: " + barcode + " created at: " + barcodeTime);
+    }
+
 
     protected PendingIntent getWidgetUpdateIntent(Context context, Boolean getNewBarcode, int widgetID) {
         // Build widget update pendingIntent
