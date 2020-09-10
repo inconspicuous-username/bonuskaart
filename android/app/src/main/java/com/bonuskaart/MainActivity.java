@@ -8,20 +8,21 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.KeyEvent;
-import android.webkit.CookieManager;
-import android.webkit.JavascriptInterface;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import com.journeyapps.barcodescanner.BarcodeEncoder;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -29,14 +30,23 @@ public class MainActivity extends AppCompatActivity {
     static String NEW_BARCODE_URL = "https://bonuskaart.com/GetCard";
     static String GITHUB_URL = "https://github.com/inconspicuous-username/bonuskaart";
     static String DONATE_URL = "https://bonuskaart.com/donate_bonuskaart.html";
+    static String WHY_URL = "https://bonuskaart.com/why.html";
+    static String HOW_URL = "https://bonuskaart.com/how.html";
 
     private final String GENERAL_PREF = "GENERAL_PREF";
     private final String BARCODE = "BARCODE";
     private final String BARCODE_TIME = "BARCODE_TIME";
+    private final String URL_TAG = "URL_TAG";
 
-    private final String NEW_BARCODE_WEB_CALLBACK = "NEW_BARCODE_WEB_CALLBACK";
+    private ImageView barcodeIV;
+    private TextView barcodeTV;
+    private TextView totalBRTV;
+    private TextView refreshTV;
+    private TextView uploadTV;
+    private TextView whyTV;
+    private TextView howTV;
+    private TextView settingsTV;
 
-    WebView webView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,186 +55,98 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //// Save context
-        //final Context context = this;
-        //
-        //// Load webView
-        //webView = findViewById(R.id.webview);
-        //
-        //// Load custom client to enable using the links
-        //webView.setWebViewClient(new myWebClient());
-        //
-        //// Enable javascript and scale site to screen width
-        //webView.getSettings().setJavaScriptEnabled(true);
-        //webView.getSettings().setLoadWithOverviewMode(true);
-        //webView.getSettings().setUseWideViewPort(true);
-        //
-        //// Load javascript interface
-        //webView.addJavascriptInterface(new WebAppInterface(this), "Android");
-        //
-        //// Get shared preferences
-        //final SharedPreferences prefs = this.getSharedPreferences(GENERAL_PREF, MODE_PRIVATE);
-        //
-        ////Check if already has barcode
-        //final String barcode = prefs.getString(BARCODE, null);
-        //long barcodeTime = prefs.getLong(BARCODE_TIME, 0);
-        //
-        //// Get current number of seconds
-        //long now = System.currentTimeMillis() / 1000;
-        //
-        //// Get new barcode if no barcode or expired
-        //if(barcode == null || now - (24 * 60 * 60) > barcodeTime){
-        //    Log.d("MainActivity", "barcode: " + barcode + " created at: " + barcodeTime + " not valid");
-        //
-        //    getNewBarcode(
-        //        new Response.Listener<String>() {
-        //            @Override
-        //            public void onResponse(String barcode) {
-        //                // Get barcode creation time
-        //                long barcodeTime = System.currentTimeMillis() / 1000;
-        //
-        //                // Get shared preferences editor
-        //                SharedPreferences.Editor editor = prefs.edit();
-        //
-        //                // Save new cookie and generation time
-        //                editor.putString(BARCODE, barcode);
-        //                editor.putLong(BARCODE_TIME, barcodeTime);
-        //                editor.apply();
-        //                Log.d("MainActivity", "New barcode: " + barcode + " created at: " + barcodeTime);
-        //
-        //                // Load website
-        //                loadWebsite(barcode);
-        //
-        //                // Update widgets
-        //                updateWidgets(context);
-        //            }
-        //        }
-        //    );
-        //}else{
-        //    Log.d("MainActivity", "Barcode: " + barcode + " created at: " + barcodeTime + " still valid");
-        //    loadWebsite(barcode);
-        //}
+        // Get all activity_main view handles
+        getViews();
+
+        // Get (new) barcode
+        String barcode = getBarcode();
+
+        displayBarcode(barcode);
+
+        setOnClickListeners();
     }
 
-    //@Override
-    //protected void onRestart() {
-    //    Log.d("MainActivity", "onRestart");
-    //    super.onRestart();
-    //
-    //    // Get shared preferences
-    //    SharedPreferences prefs = this.getSharedPreferences(GENERAL_PREF, MODE_PRIVATE);
-    //
-    //    //Get barcode
-    //    String barcode = prefs.getString(BARCODE, null);
-    //
-    //    // Store barcode in cookie to show in website
-    //    CookieManager.getInstance().setCookie(MAIN_URL, "bonuskaart=" + barcode);
-    //
-    //    // Reload when on mainpage
-    //    if(webView.getUrl().equals(MAIN_URL)) {
-    //        webView.reload();
-    //    }
-    //}
+    private void setOnClickListeners() {
+        final Context context = this;
 
-    //private void loadWebsite(String barcode){
-    //    Log.d("MainActivity", "LoadWebsite with: " + barcode);
-    //
-    //    // Store barcode in cookie to show in website
-    //    CookieManager.getInstance().setCookie(MAIN_URL, "bonuskaart=" + barcode);
-    //
-    //    // Load bonuskaart.com
-    //    webView.loadUrl(MAIN_URL);
-    //}
-    //
-    //private void getNewBarcode(Response.Listener<String> callback){
-    //    Log.d("MainActivity", "GetNewBarcode");
-    //
-    //    // Instantiate the RequestQueue.
-    //    RequestQueue queue = Volley.newRequestQueue(this);
-    //
-    //    // Request a string response from the provided URL.
-    //    StringRequest stringRequest = new StringRequest(Request.Method.GET, NEW_BARCODE_URL, callback, null);
-    //
-    //    // Add the request to the RequestQueue.
-    //    queue.add(stringRequest);
-    //}
+        // Set whyTV listener
+        whyTV.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, WebActivity.class);
+                intent.putExtra(URL_TAG, WHY_URL);
+                startActivity(intent);
+            }
+        });
 
-    //// Custom WebViewClient to load clicked url's and extract the barcode
-    //public class myWebClient extends WebViewClient
-    //{
-    //    @Override
-    //    public void onPageStarted(WebView view, String url, Bitmap favicon) {
-    //        super.onPageStarted(view, url, favicon);
-    //    }
-    //
-    //    @Override
-    //    public boolean shouldOverrideUrlLoading(WebView view, String url) {
-    //        if(url.equals(GITHUB_URL)){
-    //            Log.d("MainActivity", "GITHUB_URL");
-    //            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-    //            startActivity(browserIntent);
-    //            return true;
-    //        }
-    //
-    //        view.loadUrl(url);
-    //        return true;
-    //    }
-    //
-    //    @Override
-    //    public void onPageFinished(WebView webView, String url) {
-    //        Log.d("MainActivity", "onPageFinished URL: " + webView.getUrl());
-    //
-    //        if(webView.getUrl().equals(MAIN_URL)){
-    //            // Change the javascript to call android functions
-    //            webView.loadUrl("javascript:function androidNewBarcode() {Android.androidNewBarcode();}");
-    //            webView.loadUrl("javascript:document.getElementsByTagName('a')[0].setAttribute('onclick', \"androidNewBarcode()\");");
-    //        }else if(webView.getUrl().equals(DONATE_URL)){
-    //            webView.loadUrl("javascript:var a = document.createElement(\"a\");a.setAttribute('style', \"font-size: 40pt\");a.setAttribute('onclick', \"androidScanBarcode()\");a.innerHTML = \"Scan card\";var node = document.getElementsByTagName('form')[0];var b = document.querySelectorAll('input[type=Submit]');node.insertBefore(a, b);");
-    //        }
-    //
-    //
-    //    }
-    //}
-    //
-    //public class WebAppInterface {
-    //    Context context;
-    //
-    //    /** Instantiate the interface and set the context */
-    //    WebAppInterface(Context c) {
-    //        context = c;
-    //    }
-    //
-    //    /** Show a toast from the web page */
-    //    @JavascriptInterface
-    //    public void androidNewBarcode() {
-    //        Log.d("MainActivity", "WebAppInterface androidNewBarcode");
-    //        getNewBarcode(
-    //            new Response.Listener<String>() {
-    //                @Override
-    //                public void onResponse(String barcode) {
-    //                    // Get barcode creation time
-    //                    long barcodeTime = System.currentTimeMillis() / 1000;
-    //
-    //                    // Get shared preferences editor
-    //                    SharedPreferences prefs = context.getSharedPreferences(GENERAL_PREF, MODE_PRIVATE);
-    //                    SharedPreferences.Editor editor = prefs.edit();
-    //
-    //                    // Save new cookie and generation time
-    //                    editor.putString(BARCODE, barcode);
-    //                    editor.putLong(BARCODE_TIME, barcodeTime);
-    //                    editor.apply();
-    //                    Log.d("MainActivity", "WebAppInterface new barcode: " + barcode + " created at: " + barcodeTime);
-    //
-    //                    // Load website
-    //                    loadWebsite(barcode);
-    //
-    //                    // Update widgets
-    //                    updateWidgets(context);
-    //                }
-    //            }
-    //        );
-    //    }
-    //}
+        // Set howTV listener
+        howTV.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, WebActivity.class);
+                intent.putExtra(URL_TAG, HOW_URL);
+                startActivity(intent);
+            }
+        });
+    }
+
+    private void displayBarcode(String barcode) {
+        Log.d("MainActivity", "displayBarcode: " + barcode);
+
+        // Setup barcode bitmap generator
+        MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
+        try {
+            // Generate barcode bitmap
+            Map<EncodeHintType, Object> hintMap = new HashMap<EncodeHintType, Object>();
+            hintMap.put(EncodeHintType.MARGIN, 1);
+            BitMatrix bitMatrix = multiFormatWriter.encode(barcode, BarcodeFormat.EAN_13, 500,100, hintMap);
+            BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
+            Bitmap bitmap = barcodeEncoder.createBitmap(bitMatrix);
+
+            // Load bitmap into imageview
+            barcodeIV.setImageBitmap(bitmap);
+        } catch (WriterException e) {
+            Log.d("MainActivity", "Failed to displayBarcode: " + barcode);
+            e.printStackTrace();
+        }
+
+        // Display barcode in textview
+        barcodeTV.setText(barcode);
+    }
+
+    private String getBarcode() {
+        // Get shared preferences
+        final SharedPreferences prefs = this.getSharedPreferences(GENERAL_PREF, MODE_PRIVATE);
+
+        //Check if already has barcode
+        final String barcode = prefs.getString(BARCODE, null);
+        long barcodeTime = prefs.getLong(BARCODE_TIME, 0);
+
+        // Get current number of seconds
+        long now = System.currentTimeMillis() / 1000;
+
+        // Get new barcode if no barcode or expired
+        if(barcode == null || now - (24 * 60 * 60) > barcodeTime) {
+            Log.d("MainActivity", "barcode: " + barcode + " created at: " + barcodeTime + " not valid");
+            //TODO get new barcode from cache
+        }else{
+            Log.d("MainActivity", "barcode: " + barcode + " created at: " + barcodeTime + " valid");
+        }
+
+        return barcode;
+    }
+
+    private void getViews(){
+        //Get the views by ID
+        barcodeIV = findViewById(R.id.barcodeIV);
+        barcodeTV = findViewById(R.id.barcodeTV);
+        totalBRTV = findViewById(R.id.totalBRTV);
+        refreshTV = findViewById(R.id.refreshTV);
+        uploadTV = findViewById(R.id.uploadTV);
+        whyTV = findViewById(R.id.whyTV);
+        howTV = findViewById(R.id.howTV);
+        settingsTV = findViewById(R.id.settingsTV);
+    }
 
     public void updateWidgets(Context context){
         // Build widget update intent
@@ -234,14 +156,4 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
         sendBroadcast(intent);
     }
-
-    //// Handle back key press event for WebView to go back to previous screen.
-    //@Override
-    //public boolean onKeyDown(int keyCode, KeyEvent event){
-    //    if ((keyCode == KeyEvent.KEYCODE_BACK) && webView.canGoBack()) {
-    //        webView.goBack();
-    //        return true;
-    //    }
-    //    return super.onKeyDown(keyCode, event);
-    //}
 }

@@ -3,7 +3,6 @@ package com.bonuskaart;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -180,7 +179,7 @@ public class WidgetProvider extends AppWidgetProvider {
             Bitmap bitmap = barcodeEncoder.createBitmap(bitMatrix);
 
             // Load bitmap into imageview
-            widgetView.setImageViewBitmap(R.id.BarcodeIV, bitmap);
+            widgetView.setImageViewBitmap(R.id.barcodeIV, bitmap);
         } catch (WriterException e) {
             e.printStackTrace();
         }

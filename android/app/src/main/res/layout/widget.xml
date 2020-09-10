@@ -7,7 +7,7 @@
     android:padding="10dp">
 
     <ImageView
-        android:id="@+id/BarcodeIV"
+        android:id="@+id/barcodeIV"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/BarcodeTV"
