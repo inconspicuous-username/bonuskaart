@@ -6,7 +6,6 @@ import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,10 +21,7 @@ import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -51,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView howTV;
     private TextView settingsTV;
 
+    private BarcodeManager barcodeManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,33 +56,27 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        final Context context = this;
+
+        barcodeManager = new BarcodeManager(this, new BarcodeManager.OnBarcodereadyListener() {
+            @Override
+            public void onBarcodeReady(String barcode) {
+                // Show barcode
+                displayBarcode(barcode);
+
+                // Update widgets
+                updateWidgets(context);
+            }
+        });
+
         // Get all activity_main view handles
         getViews();
 
-        // Get current barcode
-        String barcode = getBarcode();
-
-        // Show barcode
-        displayBarcode(barcode);
+        // Get barcode
+        barcodeManager.getBarcode();
 
         // Set all onClickListeners
         setOnClickListeners();
-
-        //TODO remove debug code
-        //START DEBUG build debug barcode cashe
-        Set<String> barcode_cashe_temp = new HashSet<String>();
-        barcode_cashe_temp.add("000000000001");
-        barcode_cashe_temp.add("000000000002");
-        barcode_cashe_temp.add("000000000003");
-        barcode_cashe_temp.add("000000000004");
-        barcode_cashe_temp.add("000000000005");
-        barcode_cashe_temp.add("000000000006");
-
-        SharedPreferences prefs = this.getSharedPreferences(GENERAL_PREF, MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putStringSet(BARCODE_CASHE, barcode_cashe_temp);
-        editor.apply();
-        //END DEBUG
     }
 
     @Override
@@ -93,14 +84,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d("MainActivity", "onRestart");
         super.onRestart();
 
-        // Get shared preferences
-        SharedPreferences prefs = this.getSharedPreferences(GENERAL_PREF, MODE_PRIVATE);
-
-        //Get barcode
-        String barcode = prefs.getString(BARCODE, null);
-
-        // Show barcode
-        displayBarcode(barcode);
+        barcodeManager.getBarcode();
     }
 
     private void getViews(){
@@ -118,7 +102,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void displayBarcode(String barcode) {
-        Log.d("MainActivity", "displayBarcode: " + barcode);
+        // Load current or gets new barcode and displays in main view
+        Log.d("MainActivity", "displayBarcode");
+
+        if (barcode == null){
+            barcode = "0000000000000";
+        }
 
         // Setup barcode bitmap generator
         MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
@@ -141,89 +130,6 @@ public class MainActivity extends AppCompatActivity {
         barcodeTV.setText(barcode);
     }
 
-    private String getBarcode() {
-        Log.d("MainActivity", "getBarcode");
-
-        // Get shared preferences
-        SharedPreferences prefs = this.getSharedPreferences(GENERAL_PREF, MODE_PRIVATE);
-
-        //Check if already has barcode
-        String barcode = prefs.getString(BARCODE, null);
-        long barcodeTime = prefs.getLong(BARCODE_TIME, 0);
-
-        // Get current number of seconds
-        long now = System.currentTimeMillis() / 1000;
-
-        // Get new barcode if no barcode or expired
-        if(barcode == null || now - (24 * 60 * 60) > barcodeTime) {
-            Log.d("MainActivity", "barcode: " + barcode + " created at: " + barcodeTime + " not valid");
-            barcode = getNewBarcode();
-        }else{
-            Log.d("MainActivity", "barcode: " + barcode + " created at: " + barcodeTime + " valid");
-        }
-
-        return barcode;
-    }
-
-    private String getNewBarcode(){
-        Log.d("MainActivity", "getNewBarcode");
-
-        // Get shared preferences
-        SharedPreferences prefs = this.getSharedPreferences(GENERAL_PREF, MODE_PRIVATE);
-
-        // Retrieve barcode cache
-        Set<String> barcode_cache = prefs.getStringSet(BARCODE_CASHE, null);
-
-        String new_barcode;
-
-        if(barcode_cache != null && barcode_cache.size() > 0){
-            Log.d("MainActivity", "getNewBarcode: barcode_cache found " + barcode_cache.size());
-            if(barcode_cache.size() < 5){
-                // Cache low, download new barcodes
-                // TODO get new barcodes in new thread
-            }
-
-            // Get and remove first barcode from cache
-            Iterator<String> iterator = barcode_cache.iterator();
-            new_barcode = iterator.next();
-            iterator.remove();
-
-            Log.d("MainActivity", "getNewBarcode: barcode_cache found " + barcode_cache.size());
-            // Save updated cache
-            SharedPreferences.Editor editor = prefs.edit();
-            editor.putStringSet(BARCODE_CASHE, barcode_cache);
-            editor.apply();
-
-        }else{
-            Log.d("MainActivity", "getNewBarcode: No barcode_cache found");
-            // No cache found download new barcodes
-            //TODO get new barcodes in this thread
-            new_barcode = "000000000000";
-        }
-
-        // Save and update widget
-        saveBarcode(prefs, new_barcode);
-        updateWidgets(this);
-
-        return new_barcode;
-    }
-
-    private void saveBarcode(SharedPreferences prefs, String barcode){
-        Log.d("MainActivity", "saveBarcode: " + barcode);
-
-        // Get barcode creation time
-        long barcodeTime = System.currentTimeMillis() / 1000;
-
-        // Get shared preferences editor
-        SharedPreferences.Editor editor = prefs.edit();
-
-        // Save new barcode and generation time
-        editor.putString(BARCODE, barcode);
-        editor.putLong(BARCODE_TIME, barcodeTime);
-        editor.apply();
-        Log.d("MainActivity", "saved new barcode: " + barcode + " created at: " + barcodeTime);
-    }
-
     private void setOnClickListeners() {
         Log.d("MainActivity", "setOnClickListeners");
 
@@ -235,12 +141,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Get new barcode
-                String barcode = getNewBarcode();
-
-                // Show new barcode
-                displayBarcode(barcode);
-
-                // Update widget
+                barcodeManager.getNewBarcode();
             }
         });
 
@@ -248,6 +149,7 @@ public class MainActivity extends AppCompatActivity {
         whyTV.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Start WebActivity with WHY web page
                 Intent intent = new Intent(context, WebActivity.class);
                 intent.putExtra(URL_TAG, WHY_URL);
                 startActivity(intent);
@@ -258,6 +160,7 @@ public class MainActivity extends AppCompatActivity {
         howTV.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Start WebActivity with how web page
                 Intent intent = new Intent(context, WebActivity.class);
                 intent.putExtra(URL_TAG, HOW_URL);
                 startActivity(intent);
