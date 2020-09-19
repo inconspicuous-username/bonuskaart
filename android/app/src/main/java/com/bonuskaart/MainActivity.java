@@ -1,15 +1,21 @@
 package com.bonuskaart;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
+import android.Manifest;
+import android.app.AlertDialog;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -37,6 +43,8 @@ public class MainActivity extends AppCompatActivity {
     private final String BARCODE_TIME = "BARCODE_TIME";
     private final String BARCODE_CASHE = "BARCODE_CASHE";
     private final String URL_TAG = "URL_TAG";
+
+    private static final int REQUEST_CAMERA_PERMISSION = 201;
 
     private ImageView barcodeIV;
     private TextView barcodeTV;
@@ -142,6 +150,22 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 // Get new barcode
                 barcodeManager.getNewBarcode();
+            }
+        });
+
+        // Set whyTV listener
+        uploadTV.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                    // Start ScannerActivity
+                    Intent intent = new Intent(context, ScannerActivity.class);
+                    startActivity(intent);
+
+                } else {
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
+                }
             }
         });
 
