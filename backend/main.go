@@ -27,6 +27,29 @@ func getBonusKaart(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func getMultipleCards(w http.ResponseWriter, r *http.Request) {
+	message := "OK"
+
+	numberS := r.FormValue("number")
+	log.Println("Found", numberS)
+	number, err := strconv.Atoi(numberS)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("To many cards requested."))
+		return
+	}
+	log.Println("you've requested", number, "cards")
+	if (number > len(bonusCards)) || (number > len(bonusCards)) {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("To many cards requested."))
+		return
+	}
+	w.Header().Set("Cache-Control", "no-cache")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(message))
+
+}
+
 func getNumbberOfCards(w http.ResponseWriter, r *http.Request) {
 	Response := fmt.Sprintf("%d", len(bonusCards))
 	// Tell the client not to cache the result.
@@ -71,8 +94,9 @@ func main() {
 	http.HandleFunc("/", serveFiles)
 	http.HandleFunc("/GetCard", getBonusKaart)
 	http.HandleFunc("/GiveCard", giveBonusKaart)
+	http.HandleFunc("/getMultipleCards", getMultipleCards)
 	http.HandleFunc("/GetNumberOfCards", getNumbberOfCards)
-	if err := http.ListenAndServe(":80", nil); err != nil {
+	if err := http.ListenAndServe(":8123", nil); err != nil {
 		log.Fatal(err)
 	}
 }

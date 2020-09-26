@@ -1,11 +1,13 @@
 bonuskaart.txt
 .vscode/spellright.dict
+backend/bonuskaart.code-workspace
 # Binaries for programs and plugins
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
+backend/__debug_bin
 
 # Test binary, built with `go test -c`
 *.test
