@@ -90,7 +90,12 @@ func main() {
 	log.Println("Application started")
 	defer log.Println("Application stopped")
 	rand.Seed(time.Now().UnixNano())
-	bonusCards = readFile()
+	var err error
+	err, bonusCards = readFile()
+	if err != nil {
+		log.Fatal(err)
+	}
+	print(bonusCards)
 	http.HandleFunc("/", serveFiles)
 	http.HandleFunc("/GetCard", getBonusKaart)
 	http.HandleFunc("/GiveCard", giveBonusKaart)
@@ -101,11 +106,11 @@ func main() {
 	}
 }
 
-func readFile() []string {
+func readFile() (error, []string) {
 	var cards []string
 	file, err := os.Open("bonuskaart.txt")
 	if err != nil {
-		fmt.Print(err)
+		return err, nil
 	}
 	defer file.Close()
 
@@ -120,7 +125,7 @@ func readFile() []string {
 	}
 
 	if err := scanner.Err(); err != nil {
-		log.Print(err)
+		return err, nil
 	}
-	return cards
+	return nil, cards
 }
