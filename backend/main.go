@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"log"
 	"math/rand"
@@ -28,26 +29,27 @@ func getBonusKaart(w http.ResponseWriter, r *http.Request) {
 }
 
 func getMultipleCards(w http.ResponseWriter, r *http.Request) {
-	message := "OK"
+	// message := "OK"
 
 	numberS := r.FormValue("number")
-	log.Println("Found", numberS)
 	number, err := strconv.Atoi(numberS)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("To many cards requested."))
+		w.Write([]byte("could not be converted to number."))
 		return
 	}
-	log.Println("you've requested", number, "cards")
-	if (number > len(bonusCards)) || (number > len(bonusCards)) {
+	if (number > len(bonusCards)) || (number > 5) || (number < 1) {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("To many cards requested."))
+		w.Write([]byte("Request must between 1-5 cards"))
 		return
 	}
+
+	selectedCards := selectRandomSubset(number, bonusCards)
+	byte_cards, err := json.Marshal(selectedCards)
+
 	w.Header().Set("Cache-Control", "no-cache")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(message))
-
+	w.Write([]byte(byte_cards))
 }
 
 func getNumbberOfCards(w http.ResponseWriter, r *http.Request) {
@@ -95,7 +97,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	print(bonusCards)
+
 	http.HandleFunc("/", serveFiles)
 	http.HandleFunc("/GetCard", getBonusKaart)
 	http.HandleFunc("/GiveCard", giveBonusKaart)
@@ -128,4 +130,27 @@ func readFile() (error, []string) {
 		return err, nil
 	}
 	return nil, cards
+}
+
+func stringInSlice(a string, list []string) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+	return false
+}
+
+func selectRandomSubset(length int, list []string) []string {
+	selectedcards := make([]string, length)
+	var canditate string
+	for i, _ := range selectedcards {
+		canditate = list[rand.Intn(len(list))]
+		// Check if randomyl selected card isn't already selected.
+		for stringInSlice(canditate, selectedcards) {
+			canditate = list[rand.Intn(len(list))]
+		}
+		selectedcards[i] = canditate
+	}
+	return selectedcards
 }
