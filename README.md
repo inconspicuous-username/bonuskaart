@@ -1,3 +1,6 @@
+[![Build Status](https://bonuskaart.com/buildstatus?job=Bonuskaart)](https://bonuskaart.com/buildstatus?job=Bonuskaart)
+
+
 # Bonuskaart.com
 [Albert Heijn](https://en.wikipedia.org/wiki/Albert_Heijn) is the largest supermarket chain in the Netherlands. Their customer loyalty program comes in the form of a card, which they call 'Bonuskaart' (hence [Bonuskaart.com](https://bonuskaart.com)) which gives you discount.
 
